@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { PlayerList } from '@/components/PlayerList';
 import { PlayerForm } from '@/components/PlayerForm';
@@ -9,8 +9,12 @@ import { Modal } from '@/components/ui/Modal';
 import { Plus } from 'lucide-react';
 
 export default function PlayersPage() {
-    const { addPlayer } = usePlayerStore();
+    const { addPlayer, fetchPlayers } = usePlayerStore();
     const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+        fetchPlayers();
+    }, [fetchPlayers]);
 
     return (
         <div className="space-y-6 animate-fade-in">

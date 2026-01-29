@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import { SessionForm } from '@/components/SessionForm';
@@ -11,10 +11,15 @@ import { Plus, Calendar, Trash2 } from 'lucide-react';
 import { formatNumber, formatDate } from '@/lib/utils';
 
 export default function SessionsPage() {
-    const { players } = usePlayerStore();
-    const { sessions, addSession, deleteSession } = useSessionStore();
+    const { players, fetchPlayers } = usePlayerStore();
+    const { sessions, addSession, deleteSession, fetchSessions } = useSessionStore();
     const [showModal, setShowModal] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetchPlayers();
+        fetchSessions();
+    }, [fetchPlayers, fetchSessions]);
 
     const sortedSessions = [...sessions].sort(
         (a, b) => b.date.getTime() - a.date.getTime()

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePlayerStore } from '@/stores/playerStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import { StatsCard } from '@/components/StatsCard';
@@ -14,10 +14,16 @@ import { formatNumber, formatDate } from '@/lib/utils';
 import { Card } from '@/components/ui/Card';
 
 export default function HomePage() {
-  const { players, addPlayer } = usePlayerStore();
-  const { sessions, addSession } = useSessionStore();
+  const { players, addPlayer, fetchPlayers } = usePlayerStore();
+  const { sessions, addSession, fetchSessions, fetchRankings } = useSessionStore();
   const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [showSessionModal, setShowSessionModal] = useState(false);
+
+  useEffect(() => {
+    fetchPlayers();
+    fetchSessions();
+    fetchRankings();
+  }, [fetchPlayers, fetchSessions, fetchRankings]);
 
   const totalChips = sessions.reduce((sum, s) => sum + s.chipCount, 0);
   const recentSessions = sessions
