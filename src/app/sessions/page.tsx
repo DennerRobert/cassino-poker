@@ -19,7 +19,8 @@ export default function SessionsPage() {
     useEffect(() => {
         fetchPlayers();
         fetchSessions();
-    }, [fetchPlayers, fetchSessions]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const sortedSessions = [...sessions].sort(
         (a, b) => b.date.getTime() - a.date.getTime()

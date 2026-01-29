@@ -23,7 +23,8 @@ export default function HomePage() {
     fetchPlayers();
     fetchSessions();
     fetchRankings();
-  }, [fetchPlayers, fetchSessions, fetchRankings]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const totalChips = sessions.reduce((sum, s) => sum + s.chipCount, 0);
   const recentSessions = sessions
