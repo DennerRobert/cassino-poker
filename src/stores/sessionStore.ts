@@ -36,11 +36,14 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
             }
             const data = await response.json();
             
-            // Converter strings de data para Date objects
+            // Converter strings de data para Date objects e mapear campos do Supabase
             const sessions = data.map((session: any) => ({
-                ...session,
+                id: session.id,
+                playerId: session.player_id,
+                chipCount: session.chip_count,
                 date: new Date(session.date),
-                createdAt: new Date(session.createdAt),
+                notes: session.notes,
+                createdAt: new Date(session.created_at),
             }));
             
             set({ sessions, loading: false });
@@ -71,9 +74,12 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
             set((state) => ({ 
                 sessions: [
                     {
-                        ...newSession,
+                        id: newSession.id,
+                        playerId: newSession.player_id,
+                        chipCount: newSession.chip_count,
                         date: new Date(newSession.date),
-                        createdAt: new Date(newSession.createdAt),
+                        notes: newSession.notes,
+                        createdAt: new Date(newSession.created_at),
                     },
                     ...state.sessions
                 ],
@@ -112,9 +118,12 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
             set((state) => ({
                 sessions: state.sessions.map((s) =>
                     s.id === id ? {
-                        ...updatedSession,
+                        id: updatedSession.id,
+                        playerId: updatedSession.player_id,
+                        chipCount: updatedSession.chip_count,
                         date: new Date(updatedSession.date),
-                        createdAt: new Date(updatedSession.createdAt),
+                        notes: updatedSession.notes,
+                        createdAt: new Date(updatedSession.created_at),
                     } : s
                 ),
                 loading: false,

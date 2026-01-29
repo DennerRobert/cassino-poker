@@ -26,10 +26,13 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
             }
             const data = await response.json();
             
-            // Converter strings de data para Date objects
+            // Converter strings de data para Date objects e mapear campos do Supabase
             const players = data.map((player: any) => ({
-                ...player,
-                createdAt: new Date(player.createdAt),
+                id: player.id,
+                name: player.name,
+                email: player.email,
+                phone: player.phone,
+                createdAt: new Date(player.created_at),
             }));
             
             set({ players, loading: false });
@@ -57,8 +60,11 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
             set((state) => ({ 
                 players: [
                     {
-                        ...newPlayer,
-                        createdAt: new Date(newPlayer.createdAt),
+                        id: newPlayer.id,
+                        name: newPlayer.name,
+                        email: newPlayer.email,
+                        phone: newPlayer.phone,
+                        createdAt: new Date(newPlayer.created_at),
                     },
                     ...state.players
                 ],
@@ -89,8 +95,11 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
             set((state) => ({
                 players: state.players.map((p) =>
                     p.id === id ? {
-                        ...updatedPlayer,
-                        createdAt: new Date(updatedPlayer.createdAt),
+                        id: updatedPlayer.id,
+                        name: updatedPlayer.name,
+                        email: updatedPlayer.email,
+                        phone: updatedPlayer.phone,
+                        createdAt: new Date(updatedPlayer.created_at),
                     } : p
                 ),
                 loading: false,

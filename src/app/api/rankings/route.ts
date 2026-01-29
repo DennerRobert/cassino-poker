@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 
 export const GET = async () => {
   try {
-    // Buscar todas as sessões agrupadas por player
-    const sessions = await prisma.session.findMany({
-      include: {
-        player: true,
-      },
-    });
+    // Buscar todas as sessões
+    const { data: sessions, error } = await supabase
+      .from('sessions')
+      .select('player_id, chip_count');
+
+    if (error) throw error;
 
     // Calcular rankings
     const rankingsMap = new Map<string, {
@@ -17,15 +17,15 @@ export const GET = async () => {
       sessionCount: number;
     }>();
 
-    sessions.forEach((session) => {
-      const existing = rankingsMap.get(session.playerId);
+    sessions?.forEach((session) => {
+      const existing = rankingsMap.get(session.player_id);
       if (existing) {
-        existing.totalChips += session.chipCount;
+        existing.totalChips += session.chip_count;
         existing.sessionCount += 1;
       } else {
-        rankingsMap.set(session.playerId, {
-          playerId: session.playerId,
-          totalChips: session.chipCount,
+        rankingsMap.set(session.player_id, {
+          playerId: session.player_id,
+          totalChips: session.chip_count,
           sessionCount: 1,
         });
       }

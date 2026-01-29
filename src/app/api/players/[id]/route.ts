@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { updatePlayerSchema } from '@/schemas/player.schema';
 import { z } from 'zod';
 
@@ -9,23 +9,31 @@ export const GET = async (
 ) => {
   try {
     const { id } = await params;
-    const player = await prisma.player.findUnique({
-      where: { id },
-      include: {
-        sessions: {
-          orderBy: { date: 'desc' },
-        },
-      },
-    });
+    
+    // Buscar jogador
+    const { data: player, error: playerError } = await supabase
+      .from('players')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (!player) {
+    if (playerError || !player) {
       return NextResponse.json(
         { error: 'Jogador não encontrado' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(player);
+    // Buscar sessões do jogador
+    const { data: sessions, error: sessionsError } = await supabase
+      .from('sessions')
+      .select('*')
+      .eq('player_id', id)
+      .order('date', { ascending: false });
+
+    if (sessionsError) throw sessionsError;
+
+    return NextResponse.json({ ...player, sessions: sessions || [] });
   } catch (error) {
     console.error('Error fetching player:', error);
     return NextResponse.json(
@@ -44,18 +52,19 @@ export const PATCH = async (
     const body = await request.json();
     const validatedData = updatePlayerSchema.parse(body);
 
-    const player = await prisma.player.update({
-      where: { id },
-      data: {
-        ...(validatedData.name !== undefined && { name: validatedData.name }),
-        ...(validatedData.email !== undefined && { 
-          email: validatedData.email || null 
-        }),
-        ...(validatedData.phone !== undefined && { 
-          phone: validatedData.phone || null 
-        }),
-      },
-    });
+    const updateData: any = {};
+    if (validatedData.name !== undefined) updateData.name = validatedData.name;
+    if (validatedData.email !== undefined) updateData.email = validatedData.email || null;
+    if (validatedData.phone !== undefined) updateData.phone = validatedData.phone || null;
+
+    const { data: player, error } = await supabase
+      .from('players')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
 
     return NextResponse.json(player);
   } catch (error) {
@@ -80,9 +89,13 @@ export const DELETE = async (
 ) => {
   try {
     const { id } = await params;
-    await prisma.player.delete({
-      where: { id },
-    });
+    
+    const { error } = await supabase
+      .from('players')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

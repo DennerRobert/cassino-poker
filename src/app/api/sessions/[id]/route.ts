@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { updateSessionSchema } from '@/schemas/session.schema';
 import { z } from 'zod';
 
@@ -9,25 +9,24 @@ export const GET = async (
 ) => {
   try {
     const { id } = await params;
-    const session = await prisma.session.findUnique({
-      where: { id },
-      include: {
-        player: true,
-      },
-    });
+    
+    const { data: session, error } = await supabase
+      .from('sessions')
+      .select(`
+        *,
+        player:players(*)
+      `)
+      .eq('id', id)
+      .single();
 
-    if (!session) {
+    if (error || !session) {
       return NextResponse.json(
         { error: 'Sessão não encontrada' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({
-      ...session,
-      date: session.date.toISOString(),
-      createdAt: session.createdAt.toISOString(),
-    });
+    return NextResponse.json(session);
   } catch (error) {
     console.error('Error fetching session:', error);
     return NextResponse.json(
@@ -53,24 +52,24 @@ export const PATCH = async (
     const validatedData = updateSessionSchema.parse(body);
 
     const updateData: any = {};
-    if (validatedData.playerId !== undefined) updateData.playerId = validatedData.playerId;
-    if (validatedData.chipCount !== undefined) updateData.chipCount = validatedData.chipCount;
-    if (validatedData.date !== undefined) updateData.date = validatedData.date;
+    if (validatedData.playerId !== undefined) updateData.player_id = validatedData.playerId;
+    if (validatedData.chipCount !== undefined) updateData.chip_count = validatedData.chipCount;
+    if (validatedData.date !== undefined) updateData.date = validatedData.date.toISOString();
     if (validatedData.notes !== undefined) updateData.notes = validatedData.notes || null;
 
-    const session = await prisma.session.update({
-      where: { id },
-      data: updateData,
-      include: {
-        player: true,
-      },
-    });
+    const { data: session, error } = await supabase
+      .from('sessions')
+      .update(updateData)
+      .eq('id', id)
+      .select(`
+        *,
+        player:players(*)
+      `)
+      .single();
 
-    return NextResponse.json({
-      ...session,
-      date: session.date.toISOString(),
-      createdAt: session.createdAt.toISOString(),
-    });
+    if (error) throw error;
+
+    return NextResponse.json(session);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -93,9 +92,13 @@ export const DELETE = async (
 ) => {
   try {
     const { id } = await params;
-    await prisma.session.delete({
-      where: { id },
-    });
+    
+    const { error } = await supabase
+      .from('sessions')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

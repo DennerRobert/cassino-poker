@@ -1,36 +1,186 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎰 Cassino Poker - Sistema de Ranking
 
-## Getting Started
+Sistema web para gerenciar rankings de jogadores de poker em cassinos, construído com Next.js, Supabase, Zustand e TailwindCSS.
 
-First, run the development server:
+## 🚀 Tecnologias
+
+- **Framework**: Next.js 16.1.6 (App Router + Turbopack)
+- **Banco de Dados**: Supabase (PostgreSQL)
+- **Estado Global**: Zustand
+- **Validação**: Zod
+- **Formulários**: React Hook Form
+- **Estilização**: TailwindCSS 4 + Lucide Icons
+- **TypeScript**: Tipagem completa
+
+## 📋 Pré-requisitos
+
+- Node.js >= 20.9.0
+- Conta no Supabase (gratuita)
+- npm ou yarn
+
+## 🔧 Instalação
+
+### 1. Clonar o repositório
+
+```bash
+git clone <seu-repositorio>
+cd cassino-poker
+```
+
+### 2. Instalar dependências
+
+```bash
+npm install
+```
+
+### 3. Configurar Supabase
+
+1. Acesse [supabase.com](https://supabase.com/) e crie um novo projeto
+2. No SQL Editor, execute o script em `supabase/migrations/001_initial_schema.sql`
+3. (Opcional) Execute `supabase/seed.sql` para popular com dados de exemplo
+4. Copie as credenciais em **Settings → API**:
+   - **Project URL**
+   - **anon/public key**
+
+### 4. Configurar variáveis de ambiente
+
+Crie um arquivo `.env.local` na raiz do projeto:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anon-aqui
+```
+
+### 5. Executar em desenvolvimento
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse: [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📦 Build para Produção
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## 🌐 Deploy
 
-To learn more about Next.js, take a look at the following resources:
+### Netlify
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Conecte seu repositório ao Netlify
+2. Configure as variáveis de ambiente:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. Deploy automático!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Vercel
 
-## Deploy on Vercel
+1. Conecte seu repositório ao Vercel
+2. Configure as variáveis de ambiente
+3. Deploy automático!
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📁 Estrutura do Projeto
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/                    # App Router do Next.js
+│   ├── api/               # API Routes
+│   │   ├── players/       # CRUD de jogadores
+│   │   ├── sessions/      # CRUD de sessões
+│   │   └── rankings/      # Rankings calculados
+│   ├── players/           # Página de jogadores
+│   ├── sessions/          # Página de sessões
+│   └── ranking/           # Página de ranking
+├── components/            # Componentes React
+│   ├── ui/               # Componentes de UI reutilizáveis
+│   ├── PlayerForm.tsx
+│   ├── SessionForm.tsx
+│   └── ...
+├── lib/                   # Utilitários
+│   ├── supabase.ts       # Config do Supabase
+│   └── utils.ts          # Funções auxiliares
+├── stores/               # Estado global (Zustand)
+│   ├── playerStore.ts
+│   └── sessionStore.ts
+└── schemas/              # Validações (Zod)
+    ├── player.schema.ts
+    └── session.schema.ts
+
+supabase/
+├── migrations/           # Scripts SQL
+└── README.md            # Documentação do Supabase
+```
+
+## 🎯 Funcionalidades
+
+### Jogadores
+- ✅ Criar jogador (nome, email, telefone)
+- ✅ Listar jogadores
+- ✅ Editar jogador
+- ✅ Deletar jogador
+- ✅ Ver histórico de sessões
+
+### Sessões
+- ✅ Registrar sessão de poker
+- ✅ Vincular a um jogador
+- ✅ Registrar valor em dinheiro
+- ✅ Adicionar notas
+- ✅ Editar sessão
+- ✅ Deletar sessão
+
+### Rankings
+- ✅ Calcular total de dinheiro por jogador
+- ✅ Calcular média por sessão
+- ✅ Ordenar por total de dinheiro
+- ✅ Exibir número de sessões
+- ✅ Top 3 com destaque visual
+
+### Dashboard
+- ✅ Estatísticas gerais
+- ✅ Sessões recentes
+- ✅ Top 3 jogadores
+- ✅ Gráficos visuais
+
+## 🗄️ Estrutura do Banco de Dados
+
+### Tabela `players`
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | PK, auto-gerado |
+| name | TEXT | Nome do jogador |
+| email | TEXT | Email (opcional) |
+| phone | TEXT | Telefone (opcional) |
+| created_at | TIMESTAMP | Data de criação |
+
+### Tabela `sessions`
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| id | UUID | PK, auto-gerado |
+| player_id | UUID | FK → players.id |
+| chip_count | INTEGER | Valor em dinheiro |
+| date | TIMESTAMP | Data da sessão |
+| notes | TEXT | Observações (opcional) |
+| created_at | TIMESTAMP | Data de criação |
+
+## 🤝 Contribuindo
+
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -m 'Add nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+## 📝 Licença
+
+Este projeto está sob a licença MIT.
+
+## 📧 Contato
+
+Para dúvidas ou sugestões, abra uma issue no repositório.
+
+---
+
+⚡ Feito com Next.js e Supabase

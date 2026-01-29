@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 
 export const GET = async (
   request: NextRequest,
@@ -7,21 +7,19 @@ export const GET = async (
 ) => {
   try {
     const { playerId } = await params;
-    const sessions = await prisma.session.findMany({
-      where: { playerId },
-      orderBy: { date: 'desc' },
-      include: {
-        player: true,
-      },
-    });
+    
+    const { data: sessions, error } = await supabase
+      .from('sessions')
+      .select(`
+        *,
+        player:players(*)
+      `)
+      .eq('player_id', playerId)
+      .order('date', { ascending: false });
 
-    const formattedSessions = sessions.map((session) => ({
-      ...session,
-      date: session.date.toISOString(),
-      createdAt: session.createdAt.toISOString(),
-    }));
+    if (error) throw error;
 
-    return NextResponse.json(formattedSessions);
+    return NextResponse.json(sessions || []);
   } catch (error) {
     console.error('Error fetching player sessions:', error);
     return NextResponse.json(

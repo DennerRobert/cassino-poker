@@ -1,25 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { supabase } from '@/lib/supabase';
 import { createSessionSchema } from '@/schemas/session.schema';
 import { z } from 'zod';
 
 export const GET = async () => {
   try {
-    const sessions = await prisma.session.findMany({
-      orderBy: { date: 'desc' },
-      include: {
-        player: true,
-      },
-    });
+    const { data: sessions, error } = await supabase
+      .from('sessions')
+      .select(`
+        *,
+        player:players(*)
+      `)
+      .order('date', { ascending: false });
 
-    // Converter Date para formato compatível com o frontend
-    const formattedSessions = sessions.map((session) => ({
-      ...session,
-      date: session.date.toISOString(),
-      createdAt: session.createdAt.toISOString(),
-    }));
+    if (error) throw error;
 
-    return NextResponse.json(formattedSessions);
+    return NextResponse.json(sessions || []);
   } catch (error) {
     console.error('Error fetching sessions:', error);
     return NextResponse.json(
@@ -40,26 +36,23 @@ export const POST = async (request: NextRequest) => {
 
     const validatedData = createSessionSchema.parse(body);
 
-    const session = await prisma.session.create({
-      data: {
-        playerId: validatedData.playerId,
-        chipCount: validatedData.chipCount,
-        date: validatedData.date,
+    const { data: session, error } = await supabase
+      .from('sessions')
+      .insert({
+        player_id: validatedData.playerId,
+        chip_count: validatedData.chipCount,
+        date: validatedData.date.toISOString(),
         notes: validatedData.notes || null,
-      },
-      include: {
-        player: true,
-      },
-    });
+      })
+      .select(`
+        *,
+        player:players(*)
+      `)
+      .single();
 
-    return NextResponse.json(
-      {
-        ...session,
-        date: session.date.toISOString(),
-        createdAt: session.createdAt.toISOString(),
-      },
-      { status: 201 }
-    );
+    if (error) throw error;
+
+    return NextResponse.json(session, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
