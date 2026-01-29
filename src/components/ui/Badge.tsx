@@ -10,9 +10,9 @@ interface BadgeProps {
 export function Badge({ children, variant = 'default', className }: BadgeProps) {
     const variants = {
         default: 'bg-gray-700 text-gray-200',
-        gold: 'bg-gradient-to-r from-poker-gold-500 to-poker-gold-600 text-gray-900 shadow-glow-gold font-bold',
-        silver: 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900 font-bold',
-        bronze: 'bg-gradient-to-r from-orange-600 to-orange-700 text-white font-bold',
+        gold: 'bg-gradient-to-br from-yellow-300 via-poker-gold-500 to-yellow-600 text-gray-900 shadow-glow-gold font-extrabold border border-yellow-400',
+        silver: 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 text-gray-800 font-extrabold border border-gray-300 shadow-md',
+        bronze: 'bg-gradient-to-br from-amber-600 via-orange-600 to-amber-700 text-white font-extrabold border border-amber-500 shadow-md',
         success: 'bg-poker-green-600 text-white',
         warning: 'bg-yellow-600 text-gray-900',
     };

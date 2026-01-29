@@ -5,7 +5,7 @@ import { usePlayerStore } from '@/stores/playerStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import { Badge } from './ui/Badge';
 import { Trophy, TrendingUp } from 'lucide-react';
-import { formatNumber } from '@/lib/utils';
+import { formatNumber, cn } from '@/lib/utils';
 
 export function RankingTable() {
     const { players } = usePlayerStore();
@@ -47,11 +47,19 @@ export function RankingTable() {
                         if (!player) return null;
 
                         const average = Math.round(ranking.totalChips / ranking.sessionCount);
+                        
+                        const rowClasses = cn(
+                            "border-b border-gray-800 transition-all duration-300",
+                            index === 0 && "bg-gradient-to-r from-yellow-500/10 to-transparent hover:from-yellow-500/20 border-yellow-500/30",
+                            index === 1 && "bg-gradient-to-r from-gray-300/10 to-transparent hover:from-gray-300/20 border-gray-300/30",
+                            index === 2 && "bg-gradient-to-r from-orange-500/10 to-transparent hover:from-orange-500/20 border-orange-500/30",
+                            index > 2 && "hover:bg-white/5"
+                        );
 
                         return (
                             <tr
                                 key={ranking.playerId}
-                                className="border-b border-gray-800 hover:bg-white/5 transition-colors"
+                                className={rowClasses}
                             >
                                 <td className="py-4 px-4">
                                     {getRankBadge(index)}
