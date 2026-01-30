@@ -10,12 +10,14 @@ export const GET = async () => {
 
     if (error) throw error;
 
-    // Calcular rankings
+    // Calcular rankings com dias únicos
     const rankingsMap = new Map<string, {
       playerId: string;
       totalChips: number;
       sessionCount: number;
+      uniqueDates: Set<string>;
     }>();
+
 
     sessions?.forEach((session) => {
       const existing = rankingsMap.get(session.player_id);
@@ -27,14 +29,34 @@ export const GET = async () => {
           playerId: session.player_id,
           totalChips: session.chip_count,
           sessionCount: 1,
+
+    sessions.forEach((session) => {
+      // Extrair apenas a data (sem hora) em formato YYYY-MM-DD
+      const dateOnly = session.date.toISOString().split('T')[0];
+      
+      const existing = rankingsMap.get(session.playerId);
+      if (existing) {
+        existing.totalChips += session.chipCount;
+        existing.uniqueDates.add(dateOnly);
+      } else {
+        rankingsMap.set(session.playerId, {
+          playerId: session.playerId,
+          totalChips: session.chipCount,
+          sessionCount: 0,
+          uniqueDates: new Set([dateOnly]),
+
         });
       }
     });
 
-    // Converter para array e ordenar
-    const rankings = Array.from(rankingsMap.values()).sort(
-      (a, b) => b.totalChips - a.totalChips
-    );
+    // Converter para array, calcular sessionCount (dias únicos) e ordenar
+    const rankings = Array.from(rankingsMap.values())
+      .map(({ playerId, totalChips, uniqueDates }) => ({
+        playerId,
+        totalChips,
+        sessionCount: uniqueDates.size, // Conta apenas dias únicos
+      }))
+      .sort((a, b) => b.totalChips - a.totalChips);
 
     return NextResponse.json(rankings);
   } catch (error) {

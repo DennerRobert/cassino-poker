@@ -37,8 +37,8 @@ export function RankingTable() {
                         <th className="text-left py-4 px-4 text-gray-400 font-medium">Posição</th>
                         <th className="text-left py-4 px-4 text-gray-400 font-medium">Jogador</th>
                         <th className="text-right py-4 px-4 text-gray-400 font-medium">Total em Dinheiro</th>
-                        <th className="text-right py-4 px-4 text-gray-400 font-medium">Sessões</th>
-                        <th className="text-right py-4 px-4 text-gray-400 font-medium">Média</th>
+                        <th className="text-right py-4 px-4 text-gray-400 font-medium">Dias Jogados</th>
+                        <th className="text-right py-4 px-4 text-gray-400 font-medium">Média/Dia</th>
                     </tr>
                 </thead>
                 <tbody>
