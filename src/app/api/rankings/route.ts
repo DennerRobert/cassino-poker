@@ -6,7 +6,7 @@ export const GET = async () => {
     // Buscar todas as sessões
     const { data: sessions, error } = await supabase
       .from('sessions')
-      .select('player_id, chip_count');
+      .select('player_id, chip_count, date');
 
     if (error) throw error;
 
@@ -14,37 +14,22 @@ export const GET = async () => {
     const rankingsMap = new Map<string, {
       playerId: string;
       totalChips: number;
-      sessionCount: number;
       uniqueDates: Set<string>;
     }>();
 
-
     sessions?.forEach((session) => {
+      // Extrair apenas a data (sem hora) em formato YYYY-MM-DD
+      const dateOnly = new Date(session.date).toISOString().split('T')[0];
+      
       const existing = rankingsMap.get(session.player_id);
       if (existing) {
         existing.totalChips += session.chip_count;
-        existing.sessionCount += 1;
+        existing.uniqueDates.add(dateOnly);
       } else {
         rankingsMap.set(session.player_id, {
           playerId: session.player_id,
           totalChips: session.chip_count,
-          sessionCount: 1,
-
-    sessions.forEach((session) => {
-      // Extrair apenas a data (sem hora) em formato YYYY-MM-DD
-      const dateOnly = session.date.toISOString().split('T')[0];
-      
-      const existing = rankingsMap.get(session.playerId);
-      if (existing) {
-        existing.totalChips += session.chipCount;
-        existing.uniqueDates.add(dateOnly);
-      } else {
-        rankingsMap.set(session.playerId, {
-          playerId: session.playerId,
-          totalChips: session.chipCount,
-          sessionCount: 0,
           uniqueDates: new Set([dateOnly]),
-
         });
       }
     });
@@ -54,7 +39,7 @@ export const GET = async () => {
       .map(({ playerId, totalChips, uniqueDates }) => ({
         playerId,
         totalChips,
-        sessionCount: uniqueDates.size, // Conta apenas dias únicos
+        sessionCount: uniqueDates.size,
       }))
       .sort((a, b) => b.totalChips - a.totalChips);
 
